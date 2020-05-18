@@ -36,6 +36,9 @@ typedef enum videoresolution_t {
     VIDEORESOLUTION_4X,  /* quadruple size */
 } videoresolution_t;
 
+#define VIDEORESOLUTION_MINIMUM VIDEORESOLUTION_1X
+#define VIDEORESOLUTION_MAXIMUM VIDEORESOLUTION_4X
+
 /* video manager */
 void video_init(videoresolution_t resolution, bool smooth, bool fullscreen, int bpp);
 void video_release();

@@ -647,6 +647,21 @@ static int group_resolution_is_highlighted(group_t *g)
     return group_highlightable_is_highlighted(g);
 }
 
+static videoresolution_t resolution_decrease(const videoresolution_t resolution) {
+    if(resolution == VIDEORESOLUTION_MINIMUM) return resolution;
+    return resolution - 1;
+}
+
+static videoresolution_t resolution_increase(const videoresolution_t resolution) {
+    if(resolution == VIDEORESOLUTION_MAXIMUM) return resolution;
+    return resolution + 1;
+}
+
+static videoresolution_t resolution_cycle(const videoresolution_t resolution) {
+    if(resolution == VIDEORESOLUTION_MAXIMUM) return VIDEORESOLUTION_MINIMUM;
+    return resolution + 1;
+}
+
 static void group_resolution_update(group_t *g)
 {
     /* base class */
@@ -655,62 +670,23 @@ static void group_resolution_update(group_t *g)
     /* derived class */
     if(group_resolution_is_highlighted(g)) {
         if(!fadefx_is_fading()) {
-            if(input_button_pressed(input, IB_FIRE1) || input_button_pressed(input, IB_FIRE3)) {
-                switch(video_get_resolution()) {
-                    case VIDEORESOLUTION_1X:
-                        video_changemode(VIDEORESOLUTION_2X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_2X:
-                        video_changemode(VIDEORESOLUTION_3X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_3X:
-                        video_changemode(VIDEORESOLUTION_4X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_4X:
-                        video_changemode(VIDEORESOLUTION_1X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    default:
-                        break;
+            videoresolution_t resolution = video_get_resolution();
+            if(resolution != VIDEORESOLUTION_EDT) {
+                const videoresolution_t oldResolution = resolution;
+
+                if(input_button_pressed(input, IB_FIRE1) || input_button_pressed(input, IB_FIRE3)) {
+                    resolution = resolution_cycle(resolution);
                 }
-            }
-            if(input_button_pressed(input, IB_RIGHT)) {
-                switch(video_get_resolution()) {
-                    case VIDEORESOLUTION_1X:
-                        video_changemode(VIDEORESOLUTION_2X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_2X:
-                        video_changemode(VIDEORESOLUTION_3X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_3X:
-                        video_changemode(VIDEORESOLUTION_4X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    default:
-                        break;
+                if(input_button_pressed(input, IB_RIGHT)) {
+                    resolution = resolution_increase(resolution);
                 }
-            }
-            if(input_button_pressed(input, IB_LEFT)) {
-                switch(video_get_resolution()) {
-                    case VIDEORESOLUTION_4X:
-                        video_changemode(VIDEORESOLUTION_3X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_3X:
-                        video_changemode(VIDEORESOLUTION_2X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    case VIDEORESOLUTION_2X:
-                        video_changemode(VIDEORESOLUTION_1X, video_is_smooth(), video_is_fullscreen());
-                        sound_play(SFX_CONFIRM);
-                        break;
-                    default:
-                        break;
+                if(input_button_pressed(input, IB_LEFT)) {
+                    resolution = resolution_decrease(resolution);
+                }
+
+                if(resolution != oldResolution) {
+                    video_changemode(resolution, video_is_smooth(), video_is_fullscreen());
+                    sound_play(SFX_CONFIRM);
                 }
             }
         }
