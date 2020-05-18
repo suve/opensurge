@@ -693,10 +693,12 @@ static void group_resolution_update(group_t *g)
     }
 }
 
+#define ARROW_LEFT  "\u2190"
+#define ARROW_RIGHT "\u2192"
+
 static void group_resolution_render(group_t *g, v2d_t camera_position)
 {
     font_t *f;
-    char v[4][80];
 
     /* base class */
     group_highlightable_render(g, camera_position);
@@ -705,30 +707,18 @@ static void group_resolution_render(group_t *g, v2d_t camera_position)
     f = font_create("MenuText");
     font_set_position(f, v2d_new(OFFSET_X + 175, font_get_position(g->font).y));
 
-    str_cpy(v[0], lang_get("OPTIONS_RESOLUTION_OPT1"), sizeof(v[0]));
-    str_cpy(v[1], lang_get("OPTIONS_RESOLUTION_OPT2"), sizeof(v[1]));
-    str_cpy(v[2], lang_get("OPTIONS_RESOLUTION_OPT3"), sizeof(v[2]));
-    str_cpy(v[3], lang_get("OPTIONS_RESOLUTION_OPT4"), sizeof(v[3]));
-
-    switch(video_get_resolution()) {
-        case VIDEORESOLUTION_1X:
-            font_set_text(f, "<color=$COLOR_HIGHLIGHT>%s</color> %s %s %s", v[0], v[1], v[2], v[3]);
+    videoresolution_t resolution = video_get_resolution();
+    switch(resolution) {
+        case VIDEORESOLUTION_MINIMUM:
+            font_set_text(f, "<color=$COLOR_HIGHLIGHT>%dX</color> " ARROW_RIGHT, resolution);
             break;
 
-        case VIDEORESOLUTION_2X:
-            font_set_text(f, "%s <color=$COLOR_HIGHLIGHT>%s</color> %s %s", v[0], v[1], v[2], v[3]);
+        case VIDEORESOLUTION_MAXIMUM:
+            font_set_text(f, ARROW_LEFT " <color=$COLOR_HIGHLIGHT>%dX</color>", resolution);
             break;
 
-        case VIDEORESOLUTION_3X:
-            font_set_text(f, "%s %s <color=$COLOR_HIGHLIGHT>%s</color> %s", v[0], v[1], v[2], v[3]);
-            break;
-
-        case VIDEORESOLUTION_4X:
-            font_set_text(f, "%s %s %s <color=$COLOR_HIGHLIGHT>%s</color>", v[0], v[1], v[2], v[3]);
-            break;
-            
         default:
-            break;
+            font_set_text(f, ARROW_LEFT " <color=$COLOR_HIGHLIGHT>%dX</color> " ARROW_RIGHT, resolution);
     }
 
     font_render(f, camera_position);
